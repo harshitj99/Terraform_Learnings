@@ -2,6 +2,12 @@
 data "aws_availability_zones" "available" {}
 data "aws_region" "current" {}
 
+locals {
+  team = "api_mgmt_dev"
+  application = "corp_api"
+  server_name = "server-${var.environment}-api-${var.sub_az}"
+}
+
 #Define the VPC
 resource "aws_vpc" "vpc" {
   cidr_block = var.vpc_cidr
@@ -10,6 +16,7 @@ resource "aws_vpc" "vpc" {
     Name        = var.vpc_name
     Environment = "demo_environment"
     Terraform   = "true"
+    Region      = data.aws_region.current.id
   }
 }
 
@@ -134,7 +141,9 @@ resource "aws_internet_gateway" "internet_gateway" {
 #   instance_type = "t3.micro"
 #   subnet_id     = aws_subnet.public_subnets["public_subnet_1"].id
 #   tags = {
-#     Name = "Ubuntu EC2 Server"
+#     Name = local.server_name
+#     Team = local.team
+#     Application = local.application
 #   }
 # }
 
@@ -181,12 +190,12 @@ resource "random_id" "randomness" {
 
 resource "aws_subnet" "variables-subnet" {
   vpc_id                  = aws_vpc.vpc.id
-  cidr_block              = "10.0.250.0/24"
-  availability_zone       = "us-east-1a"
-  map_public_ip_on_launch = true
+  cidr_block              = var.sub_cidr
+  availability_zone       = var.sub_az
+  map_public_ip_on_launch = var.sub_auto_assign_ip
 
   tags = {
-    Name      = "sub-variables-us-east-1a"
+    Name      = "sub-variables-${var.sub_az}"
     Terraform = "true"
   }
 }
