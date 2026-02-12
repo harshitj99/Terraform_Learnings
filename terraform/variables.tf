@@ -31,22 +31,22 @@ variable "public_subnets" {
 
 variable "sub_cidr" {
   description = "CIDR Block for the subnet"
-  type = string
-  default = "10.0.202.0/24"
+  type        = string
+  default     = "10.0.202.0/24"
 }
 variable "sub_az" {
   description = "Availability Zone for the subnet"
-  type = string
-  default = "us-east-1a"
+  type        = string
+  default     = "us-east-1a"
 }
 variable "sub_auto_assign_ip" {
   description = "Auto-assign IP for the subnet"
-  type = bool
-  default = true
+  type        = bool
+  default     = true
 }
 
 variable "environment" {
   description = "environment for server"
-  default = "dev"
-  type = string
+  default     = "dev"
+  type        = string
 }

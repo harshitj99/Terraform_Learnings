@@ -3,7 +3,7 @@ data "aws_availability_zones" "available" {}
 data "aws_region" "current" {}
 
 locals {
-  team = "api_mgmt_dev"
+  team        = "api_mgmt_dev"
   application = "corp_api"
   server_name = "server-${var.environment}-api-${var.sub_az}"
 }
@@ -52,8 +52,8 @@ resource "aws_route_table" "public_route_table" {
   vpc_id = aws_vpc.vpc.id
 
   route {
-    cidr_block     = "0.0.0.0/0"
-    gateway_id     = aws_internet_gateway.internet_gateway.id
+    cidr_block = "0.0.0.0/0"
+    gateway_id = aws_internet_gateway.internet_gateway.id
     #nat_gateway_id = aws_nat_gateway.nat_gateway.id
   }
   tags = {
@@ -65,11 +65,11 @@ resource "aws_route_table" "public_route_table" {
 resource "aws_route_table" "private_route_table" {
   vpc_id = aws_vpc.vpc.id
 
-#   route {
-#     cidr_block     = "0.0.0.0/0"
-#     gateway_id     = aws_internet_gateway.internet_gateway.id
-#     nat_gateway_id = aws_nat_gateway.nat_gateway.id
-#   }
+  #   route {
+  #     cidr_block     = "0.0.0.0/0"
+  #     gateway_id     = aws_internet_gateway.internet_gateway.id
+  #     nat_gateway_id = aws_nat_gateway.nat_gateway.id
+  #   }
   tags = {
     Name      = "demo_private_rtb"
     Terraform = "true"
@@ -148,21 +148,21 @@ resource "aws_internet_gateway" "internet_gateway" {
 # }
 
 resource "aws_s3_bucket" "test-bucket" {
-    bucket = "demo-terraform-s3-bucket-${random_id.randomness.hex}"
-    
-    tags = {
-        Name        = "demo_s3_bucket"
-        Environment = "demo_environment"
-        Terraform   = "true"
-    }
+  bucket = "demo-terraform-s3-bucket-${random_id.randomness.hex}"
+
+  tags = {
+    Name        = "demo_s3_bucket"
+    Environment = "demo_environment"
+    Terraform   = "true"
+  }
 }
 
 resource "aws_s3_bucket_ownership_controls" "my_bucket_acl" {
-    bucket = aws_s3_bucket.test-bucket.id
+  bucket = aws_s3_bucket.test-bucket.id
 
-    rule {
-        object_ownership = "BucketOwnerPreferred"
-    }
+  rule {
+    object_ownership = "BucketOwnerPreferred"
+  }
 }
 
 resource "aws_security_group" "my-new-security-group" {
@@ -188,6 +188,8 @@ resource "random_id" "randomness" {
   byte_length = 16
 }
 
+
+# input variables for subnet resource
 resource "aws_subnet" "variables-subnet" {
   vpc_id                  = aws_vpc.vpc.id
   cidr_block              = var.sub_cidr
@@ -199,3 +201,25 @@ resource "aws_subnet" "variables-subnet" {
     Terraform = "true"
   }
 }
+
+#using modules to create subnets
+module "subnet_addrs" {
+  source          = "hashicorp/subnets/cidr"
+  version         = "1.0.0"
+  base_cidr_block = "10.0.0.0/22"
+  networks = [
+    {
+      name     = "module_network_a"
+      new_bits = 2
+    },
+    {
+      name     = "module_network_b"
+      new_bits = 2
+    }
+  ]
+}
+
+#this is a test to check if the module is working correctly, usually we should have outputs in outputs.tf file
+# output "subnet_addrs" {
+#   value = module.subnet_addrs.network_cidr_blocks
+# }
